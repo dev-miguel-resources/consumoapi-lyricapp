@@ -8,7 +8,7 @@ const LyricsContextProvider = ({children}) => {
     const commontrack_id = window.location.pathname.split('/')[3];
     const [doneFetchTrack, setDoneFetchTrack] = useState(false);
     const [doneFetchLyrics, setDoneFetchLyrics] = useState(false);
-    const [tracks, setTracks] = useState([]);
+    const [tracks, setTrack] = useState([]);
     const [lyrics, setLyrics] = useState([]);
 
     useEffect(() => getTrack(commontrack_id), [commontrack_id]);
@@ -20,8 +20,28 @@ const LyricsContextProvider = ({children}) => {
             .then(data => {
                 const { body } = data.message;
                 setDoneFetchTrack(true);
+                !Array.isArray(body) && setTrack(body.track);
             })
+            .catch(err => console.log(err));
     }
 
+    const getLyrics = commontrack_id => {
+        fetch(trackLyricsGet(commontrack_id))
+        .then(res => res.json())
+        .then(data => {
+            const { body } = data.message;
+            setDoneFetchLyrics(true);
+            !Array.isArray(body) && setLyrics(body.lyrics.lyrics_body);
+        })
+        .catch(err => console.log(err));
+    }
 
-}
+    return (
+        <LyricsContext.Provider value={{ doneFetchTrack, doneFetchLyrics, track, lyrics}}>
+                {children}
+        </LyricsContext.Provider>
+    );
+
+};
+
+export default LyricsContextProvider;
